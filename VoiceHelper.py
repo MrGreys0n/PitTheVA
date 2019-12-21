@@ -11,11 +11,13 @@ opts = {
     "alias": ("пит", "питон", "пайтон", "питоша", "питер",
               "питэр", "тварь", "пид"),
     "tbr": ("скажи", "расскажи", "покажи", "подскажи", 
-            "сколько", "произнеси", "назови"),
+            "сколько", "произнеси", "назови", "включи", "открой", "запусти"),
     "cmds": {
         "ctime": ('текущее время', 'сейчас времени', 'который час'),
-        "music": ('включи музыку', 'запусти музыку', 'музыка'),
-        "stupid": ('расскажи анекдот', 'рассмеши меня', 'ты знаешь анекдот')
+        "music": ('музыку', 'музыка'),
+        "stupid": ('расскажи анекдот', 'рассмеши меня', 'ты знаешь анекдот'),
+        "vk": ('в контакте', 'вконтакте', 'вк'),
+        "yt": ('youtube', 'ютуб')
     }
 }
 
@@ -58,7 +60,13 @@ def execute_cmd(cmd):
     elif cmd == 'music':
         # воспроизвести радио
         webbrowser.open_new("https://studio21.ru")
-   
+    
+    elif cmd == 'vk':
+        webbrowser.open_new("https://vk.com/feed")
+
+    elif cmd == 'yt':
+        webbrowser.open_new("https://www.youtube.com/")
+
     elif cmd == 'stupid':
         # рассказать анекдот
         speak("Мой разработчик не научил меня анекдотам ... Ха ха ха")
@@ -66,9 +74,10 @@ def execute_cmd(cmd):
     else:
         print('Команда не распознана, повторите!')
 
-def listen():
+def listen(index):
     r = sr.Recognizer()
-    micro = sr.Microphone(device_index = mindex())
+    indexmicro = index
+    micro = sr.Microphone(device_index = indexmicro)
     speak("Пит слушает. Скажите, что мне надо сделать:")
     with micro as source:
         audio = r.listen(source)
@@ -78,10 +87,13 @@ def listen():
         callback(cmd)
     except sr.UnknownValueError:
         speak("Извините, я Вас не расслышала")
-        listen()
-    print("Нажмите Enter, если хотите ещё что-то сказать")
-    input()
-    listen()
+        listen(index)
+    print('Нажмите Enter, если хотите ещё что-то сказать. Напишите "стоп", если хотите выключить меня')
+    a = input()
+    if a.lower() != "стоп":
+        listen(indexmicro)
+    speak("До новых встреч!")
+    print("Выключение...")
     
  
 # запуск
@@ -91,6 +103,6 @@ speak_engine = pyttsx3.init()
 
 speak("Добрый день, повелитель")
 
-#micro = sr.Microphone(device_index = mindex())
+index = mindex()
 
-listen()
+listen(index)
