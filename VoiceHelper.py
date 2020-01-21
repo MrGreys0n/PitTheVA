@@ -5,7 +5,7 @@ from fuzzywuzzy import fuzz
 import pyttsx3
 import datetime
 import webbrowser
-from micro import mindex
+from random import choice
 
 opts = {
     "alias": ("пит", "питон", "пайтон", "питоша", "питер",
@@ -59,13 +59,16 @@ def execute_cmd(cmd):
    
     elif cmd == 'music':
         # воспроизвести радио
-        webbrowser.open_new("https://studio21.ru")
+        speak(choice(['Открываю...', 'Включаю...', 'Запускаю...']))
+        webbrowser.open_new("https://studio21.ru/radio/")
     
     elif cmd == 'vk':
+        speak('Открываю...')
         webbrowser.open_new("https://vk.com/feed")
 
     elif cmd == 'yt':
-        webbrowser.open_new("https://www.youtube.com/")
+            speak('Открываю...')
+            webbrowser.open_new("https://www.youtube.com/")
 
     elif cmd == 'stupid':
         # рассказать анекдот
@@ -92,8 +95,9 @@ def listen(index):
     a = input()
     if a.lower() != "стоп":
         listen(indexmicro)
-    speak("До новых встреч!")
-    print("Выключение...")
+    else:
+        speak("До новых встреч!")
+        print("Выключение...")
     
  
 # запуск
@@ -103,6 +107,11 @@ speak_engine = pyttsx3.init()
 
 speak("Добрый день, повелитель")
 
-index = mindex()
-
-listen(index)
+try:
+    with open('index.txt', 'r') as f:
+        index = f.read()
+        if len(index) == 1:
+            index = int(index)
+        listen(index)
+except FileNotFoundError:
+    speak('Выберите микрофон в приложении micro.exe')
