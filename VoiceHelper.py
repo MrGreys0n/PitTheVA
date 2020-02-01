@@ -34,12 +34,14 @@ def callback(cmd):
         cmd = cmd.replace(x, "").strip()
 
     for x in opts['tbr']:
-        if x in cmd:
+        phrases = opts['tbrphrases'].keys()
+        if x in cmd.lower() and x in phrases:
             cmd = cmd.replace(x, "").strip()
-            if x in opts['tbrphrases']:
-                speak(opts['tbphrases'][x])
+            phr = opts['tbrphrases'].get(x, 'Выполняю...')
+            speak(phr)
 
     # распознаем и выполняем команду
+    
     cmd = recognize_cmd(cmd)
     execute_cmd(cmd['cmd'])
  
@@ -67,16 +69,13 @@ def execute_cmd(cmd):
    
     elif cmd == 'music':
         # воспроизвести радио
-        speak(choice(['Открываю...', 'Включаю...', 'Запускаю...']))
         webbrowser.open_new("https://studio21.ru/radio/")
     
     elif cmd == 'vk':
-        speak('Открываю...')
         webbrowser.open_new("https://vk.com/feed")
 
     elif cmd == 'yt':
-            speak('Открываю...')
-            webbrowser.open_new("https://www.youtube.com/")
+        webbrowser.open_new("https://www.youtube.com/")
 
     elif cmd == 'stupid':
         # рассказать анекдот
@@ -94,7 +93,7 @@ def listen(index):
         audio = r.listen(source)
     try:
         cmd = r.recognize_google(audio, language="ru-RU")
-        print("Вы сказали: " + cmd.lower())
+        print("Вы сказали: " + cmd)
         callback(cmd)
     except sr.UnknownValueError:
         speak("Извините, я Вас не расслышала")
