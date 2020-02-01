@@ -1,7 +1,6 @@
 import speech_recognition as sr
 import os
 import time
-from fuzzywuzzy import fuzz
 import pyttsx3
 import datetime
 import webbrowser
@@ -14,13 +13,24 @@ opts = {
             "сколько", "произнеси", "назови", "включи", "открой", "запусти"),
     "tbrphrases": {"включи": "Включаю...", "открой": "Открываю...", "запусти": "Запускаю..."},
     "cmds": {
-        "ctime": ('текущее время', 'сейчас времени', 'который час'),
+        "hi": ('привет', 'здравствуйте', 'здравствуй'),
+        "ctime": ('время', 'времени', 'час'),
         "music": ('музыку', 'музыка'),
-        "stupid": ('расскажи анекдот', 'рассмеши меня', 'ты знаешь анекдот'),
+        "stupid": ('анекдот', 'рассмеши'),
         "vk": ('в контакте', 'вконтакте', 'вк', 'vk'),
-        "yt": ('youtube', 'ютуб')
+        "yt": ('youtube', 'ютуб'),
+        "bye": ('пока', 'прощай', 'до свидания')
     }
 }
+
+JOKES = ["В борьбе с коррупцией главное - не победа, а участие...",
+        "Хорошо, когда начальник замечает, как ты работаешь. Плохо только, что это бывает, когда ты не работаешь."]
+comand = ""
+TO_QUIT = False
+
+def goodbye():
+    speak("До новых встреч!")
+    print("Выключение...")
 
 #functions
 def speak(what):
@@ -30,6 +40,7 @@ def speak(what):
     speak_engine.stop()
  
 def callback(cmd):
+    global comand
     for x in opts['alias']:
         cmd = cmd.replace(x, "").strip()
 
@@ -39,25 +50,27 @@ def callback(cmd):
             cmd = cmd.replace(x, "").strip()
             phr = opts['tbrphrases'].get(x, 'Выполняю...')
             speak(phr)
+    
+    comand = cmd.lower()
 
     # распознаем и выполняем команду
     
     cmd = recognize_cmd(cmd)
-    execute_cmd(cmd['cmd'])
+    execute_cmd(cmd)
  
 def recognize_cmd(cmd):
-    RC = {'cmd': '', 'percent': 0}
-    for c,v in opts['cmds'].items():
- 
-        for x in v:
-            vrt = fuzz.ratio(cmd, x)
-            if vrt > RC['percent']:
-                RC['cmd'] = c
-                RC['percent'] = vrt
-   
-    return RC
+    cmd = cmd.lower().split()
+    for word in cmd:
+        for i in opts["cmds"]:
+            if word in opts["cmds"][i]:
+                return i
+    
+    return "search"
+    
  
 def execute_cmd(cmd):
+    global TO_QUIT
+
     if cmd == 'ctime':
         # сказать текущее время
         now = datetime.datetime.now()
@@ -67,6 +80,12 @@ def execute_cmd(cmd):
             minute = "0" + minute
         speak("Сейчас " + hour + ":" + minute)
    
+    elif cmd == 'hi':
+        speak(choice(["И Вам здравствуйте", "И тебе привет", "Привет"]))
+
+    elif cmd == 'bye':
+        TO_QUIT = True
+
     elif cmd == 'music':
         # воспроизвести радио
         webbrowser.open_new("https://studio21.ru/radio/")
@@ -79,10 +98,10 @@ def execute_cmd(cmd):
 
     elif cmd == 'stupid':
         # рассказать анекдот
-        speak("Мой разработчик не научил меня анекдотам ... Ха ха ха")
+        speak(choice(JOKES))
    
     else:
-        print('Команда не распознана, повторите!')
+        webbrowser.open_new("https://yandex.ru/search/?lr=12&clid=9403&oprnd=4358289752&text=" + comand)
 
 def listen(index):
     r = sr.Recognizer()
@@ -98,17 +117,17 @@ def listen(index):
     except sr.UnknownValueError:
         speak("Извините, я Вас не расслышала")
         listen(index)
-    print('Нажмите Enter, если хотите ещё что-то сказать. Напишите "стоп", если хотите выключить меня')
-    a = input()
-    if a.lower() != "стоп":
-        listen(indexmicro)
+    if not TO_QUIT:
+        print('Нажмите Enter, если хотите ещё что-то сказать. Напишите "стоп", если хотите выключить меня')
+        a = input()
+        if a.lower() != "стоп":
+            listen(indexmicro)
+        else:
+            goodbye()
     else:
-        speak("До новых встреч!")
-        print("Выключение...")
+        goodbye()
     
- 
-# запуск
-#r = sr.Recognizer()
+
  
 speak_engine = pyttsx3.init()
 
@@ -117,8 +136,20 @@ speak("Добрый день, повелитель")
 try:
     with open('index.txt', 'r') as f:
         index = f.read()
-        if len(index) == 1:
-            index = int(index)
-        listen(index)
+
+        try:
+            if index in (str(i) for i in range(0, 11)):
+                index = int(index)
+            listen(index)
+
+        except AssertionError:
+            speak('Выберите микрофон в приложении micro.exe\nНе изменяйте файл index.txt вручную!')
+            print('Выключение...')
+
+        except OSError:
+            speak('Неизвестная ошибка, связанная с выбранным микрофоном.\nВыберите микрофон в приложении micro.exe и проверьте его работоспособность.')
+            print('Выключение...')
+
 except FileNotFoundError:
     speak('Выберите микрофон в приложении micro.exe')
+    print('Выключение...')
