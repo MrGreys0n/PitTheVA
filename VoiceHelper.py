@@ -12,11 +12,12 @@ opts = {
               "питэр", "тварь", "пид"),
     "tbr": ("скажи", "расскажи", "покажи", "подскажи", 
             "сколько", "произнеси", "назови", "включи", "открой", "запусти"),
+    "tbrphrases": {"включи": "Включаю...", "открой": "Открываю...", "запусти": "Запускаю..."},
     "cmds": {
         "ctime": ('текущее время', 'сейчас времени', 'который час'),
         "music": ('музыку', 'музыка'),
         "stupid": ('расскажи анекдот', 'рассмеши меня', 'ты знаешь анекдот'),
-        "vk": ('в контакте', 'вконтакте', 'вк'),
+        "vk": ('в контакте', 'вконтакте', 'вк', 'vk'),
         "yt": ('youtube', 'ютуб')
     }
 }
@@ -33,7 +34,10 @@ def callback(cmd):
         cmd = cmd.replace(x, "").strip()
 
     for x in opts['tbr']:
-        cmd = cmd.replace(x, "").strip()
+        if x in cmd:
+            cmd = cmd.replace(x, "").strip()
+            if x in opts['tbrphrases']:
+                speak(opts['tbphrases'][x])
 
     # распознаем и выполняем команду
     cmd = recognize_cmd(cmd)
@@ -55,7 +59,11 @@ def execute_cmd(cmd):
     if cmd == 'ctime':
         # сказать текущее время
         now = datetime.datetime.now()
-        speak("Сейчас " + str(now.hour) + ":" + str(now.minute))
+        hour = str(now.hour)
+        minute = str(now.minute)
+        if len(minute) < 2:
+            minute = "0" + minute
+        speak("Сейчас " + hour + ":" + minute)
    
     elif cmd == 'music':
         # воспроизвести радио
