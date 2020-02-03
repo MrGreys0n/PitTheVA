@@ -4,6 +4,7 @@ import time
 import pyttsx3
 import datetime
 import webbrowser
+import playsound
 from random import choice
 
 opts = {
@@ -86,9 +87,21 @@ def execute_cmd(cmd):
     elif cmd == 'bye':
         TO_QUIT = True
 
+
     elif cmd == 'music':
-        # воспроизвести радио
-        webbrowser.open_new("https://studio21.ru/radio/")
+        try:
+            with open('music.txt') as f:
+                for line in f:
+                    adress = line
+            if "$$$" in adress:
+                webbrowser.open_new(adress.split("$$$")[1])
+            else:
+                playsound.playsound(adress, True)
+
+        except FileNotFoundError:
+            speak('Указанного вами файла .mp3 не существует. Путь должен быть следующего вида: D:\music\Roses.mp3')
+            #webbrowser.open_new("https://studio21.ru/radio/")
+    
     
     elif cmd == 'vk':
         webbrowser.open_new("https://vk.com/feed")
@@ -147,7 +160,7 @@ try:
             print('Выключение...')
 
         except OSError:
-            speak('Неизвестная ошибка, связанная с выбранным микрофоном.\nВыберите микрофон в приложении micro.exe и проверьте его работоспособность.')
+            speak('Неизвестная ошибка, связанная с выбранным микрофоном.\nВыберите микрофон в приложении micro.py и проверьте его работоспособность.')
             print('Выключение...')
 
 except FileNotFoundError:
