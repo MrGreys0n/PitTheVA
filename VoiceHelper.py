@@ -17,6 +17,7 @@ opts = {
         "hi": ('привет', 'здравствуйте', 'здравствуй'),
         "ctime": ('время', 'времени', 'час'),
         "music": ('музыку', 'музыка'),
+        "stopmusic": ('остановить', 'останови'),
         "stupid": ('анекдот', 'рассмеши'),
         "vk": ('в контакте', 'вконтакте', 'вк', 'vk'),
         "yt": ('youtube', 'ютуб'),
@@ -27,7 +28,7 @@ opts = {
 JOKES = ["В борьбе с коррупцией главное - не победа, а участие...",
         "Хорошо, когда начальник замечает, как ты работаешь. Плохо только, что это бывает, когда ты не работаешь."]
 comand = ""
-TO_QUIT = False
+TO_QUIT, STOP = False, False
 
 def goodbye():
     speak("До новых встреч!")
@@ -87,6 +88,9 @@ def execute_cmd(cmd):
     elif cmd == 'bye':
         TO_QUIT = True
 
+    elif cmd == 'stopmusic':
+        playsound.playsound(None, False)
+
 
     elif cmd == 'music':
         try:
@@ -96,7 +100,8 @@ def execute_cmd(cmd):
             if "$$$" in adress:
                 webbrowser.open_new(adress.split("$$$")[1])
             else:
-                playsound.playsound(adress, True)
+                print('Чтобы остановить музыку, скажите "Остановить"')
+                playsound.playsound(adress, False)
 
         except FileNotFoundError:
             speak('Указанного вами файла .mp3 не существует. Путь должен быть следующего вида: D:\music\Roses.mp3')
@@ -117,6 +122,7 @@ def execute_cmd(cmd):
         webbrowser.open_new("https://yandex.ru/search/?lr=12&clid=9403&oprnd=4358289752&text=" + comand)
 
 def listen(index):
+    global STOP
     r = sr.Recognizer()
     indexmicro = index
     micro = sr.Microphone(device_index = indexmicro)
@@ -131,14 +137,12 @@ def listen(index):
         speak("Извините, я Вас не расслышала")
         listen(index)
     if not TO_QUIT:
-        print('Нажмите Enter, если хотите ещё что-то сказать. Напишите "стоп", если хотите выключить меня')
-        a = input()
-        if a.lower() != "стоп":
-            listen(indexmicro)
-        else:
-            goodbye()
-    else:
-        goodbye()
+        if not STOP:
+            a = input('Нажмите Enter, если хотите ещё что-то сказать. Напишите "стоп", если хотите выключить меня: ')
+            if a.lower() != "стоп":
+                listen(indexmicro)
+            else:
+                STOP = True
     
 
  
@@ -166,3 +170,6 @@ try:
 except FileNotFoundError:
     speak('Выберите микрофон в приложении micro.exe')
     print('Выключение...')
+
+if STOP or TO_QUIT:
+    goodbye()
