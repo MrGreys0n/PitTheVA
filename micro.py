@@ -17,21 +17,20 @@ def mindex():
 
         if MICRO:
             if name not in names:
-                print("Микрофон \"{1}\" найден с (device_index={0})".format(index, name))
+                print("Микрофон \"{1}\" найден с индексом {0}".format(index, name))
                 indexes.append(str(index))
                 names.append(name)
         else:
             MICRO = True
 
-    index = input("Введите device_index своего микрофона: ")
+    index = input("Введите индекс своего микрофона: ")
 
     if index in indexes:
         with open('index.txt', 'w') as f:
             f.write(index)
             print('ok')
     else:
-        print('Вы ввели некорректный device_index!')
-        print('----------------------------------------------------------------------------')
+        print('Вы ввели некорректный индекс!')
         mindex()
 
 mindex()
