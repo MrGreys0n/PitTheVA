@@ -72,7 +72,6 @@ def recognize_cmd(cmd):
  
 def execute_cmd(cmd):
     global TO_QUIT
-    print(cmd)
     if cmd == 'ctime':
         # сказать текущее время
         now = datetime.datetime.now()
