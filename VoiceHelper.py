@@ -21,7 +21,7 @@ opts = {
         "stupid": ('анекдот', 'рассмеши'),
         "vk": ('в контакте', 'вконтакте', 'вк', 'vk'),
         "yt": ('youtube', 'ютуб'),
-        "bye": ('пока', 'прощай', 'до свидания')
+        "bye": ('пока', 'прощай', 'досвидания')
     }
 }
 
@@ -72,7 +72,7 @@ def recognize_cmd(cmd):
  
 def execute_cmd(cmd):
     global TO_QUIT
-
+    print(cmd)
     if cmd == 'ctime':
         # сказать текущее время
         now = datetime.datetime.now()
@@ -89,8 +89,8 @@ def execute_cmd(cmd):
         TO_QUIT = True
 
     elif cmd == 'stopmusic':
-        playsound.playsound(None, False)
-
+        #playsound.playsound('E//Music/stop.mp3', False)
+        print('Это невозможно')
 
     elif cmd == 'music':
         try:
@@ -100,12 +100,13 @@ def execute_cmd(cmd):
             if "$$$" in adress:
                 webbrowser.open_new(adress.split("$$$")[1])
             else:
-                print('Чтобы остановить музыку, скажите "Остановить"')
                 playsound.playsound(adress, False)
 
         except FileNotFoundError:
             speak('Указанного вами файла .mp3 не существует. Путь должен быть следующего вида: D:\music\Roses.mp3')
-            #webbrowser.open_new("https://studio21.ru/radio/")
+            webbrowser.open_new("https://studio21.ru/radio/")
+        except UnicodeDecodeError:
+            speak('Вы ввели некорректный путь. Путь должен быть следующего вида: D:\music\Roses.mp3')
     
     
     elif cmd == 'vk':
@@ -153,23 +154,17 @@ speak("Добрый день, повелитель")
 try:
     with open('index.txt', 'r') as f:
         index = f.read()
+        if index in (str(i) for i in range(0, 11)):
+            index = int(index)
+        listen(index)
 
-        try:
-            if index in (str(i) for i in range(0, 11)):
-                index = int(index)
-            listen(index)
-
-        except AssertionError:
-            speak('Выберите микрофон в приложении micro.exe\nНе изменяйте файл index.txt вручную!')
-            print('Выключение...')
-
-        except OSError:
-            speak('Неизвестная ошибка, связанная с выбранным микрофоном.\nВыберите микрофон в приложении micro.py и проверьте его работоспособность.')
-            print('Выключение...')
-
-except FileNotFoundError:
-    speak('Выберите микрофон в приложении micro.exe')
+except AssertionError:
+    speak('Выберите микрофон в приложении micro.exe\nНе изменяйте файл index.txt вручную!')
     print('Выключение...')
 
+except OSError:
+    speak('Неизвестная ошибка, связанная с выбранным микрофоном.\nВыберите микрофон в приложении micro.py и проверьте его работоспособность.')
+    STOP = True
+    
 if STOP or TO_QUIT:
     goodbye()
