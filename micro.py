@@ -7,6 +7,7 @@ indexes = []
 names = []
 
 def mindex():
+    global MICRO
     for index, name in enumerate(sr.Microphone.list_microphone_names()):
         if index > 10:
             break
